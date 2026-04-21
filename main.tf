@@ -5,15 +5,41 @@ provider "aws" {
 # EC2 instance for Jenkins + GitHub Runner + MCP Servers
 resource "aws_instance" "devops_server" {
   ami           = "ami-0442403fb8d244144"
-  instance_type = "t3.medium"
-  key_name      = "mnnashyKeyPair"
+  instance_type = "t3.large"
+  key_name      = var.key_name
 
   vpc_security_group_ids = [aws_security_group.devops_sg.id]
+
+  root_block_device {
+    volume_size = 30
+    volume_type = "gp3"
+    encrypted   = true
+  }
+
+  monitoring = true
 
   tags = {
     Name        = "DevOps-Agent-Test"
     Environment = "test"
     Project     = "devops-agent"
+    ManagedBy   = "terraform"
+  }
+}
+
+# CloudWatch alarm for high CPU
+resource "aws_cloudwatch_metric_alarm" "high_cpu" {
+  alarm_name          = "devops-server-high-cpu"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 2
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/EC2"
+  period              = 300
+  statistic           = "Average"
+  threshold           = 80
+  alarm_description   = "Alarm when CPU exceeds 80%"
+
+  dimensions = {
+    InstanceId = aws_instance.devops_server.id
   }
 }
 
@@ -28,7 +54,7 @@ resource "aws_security_group" "devops_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.allowed_cidr]
   }
 
   ingress {
