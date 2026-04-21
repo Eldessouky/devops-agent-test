@@ -102,3 +102,10 @@ resource "aws_s3_bucket" "jenkins_artifacts" {
     ManagedBy = "terraform"
   }
 }
+
+resource "aws_s3_bucket_versioning" "jenkins_artifacts" {
+  bucket = aws_s3_bucket.jenkins_artifacts.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
