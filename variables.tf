@@ -17,3 +17,8 @@ variable "allowed_cidr" {
   default     = "0.0.0.0/0"
   description = "CIDR block allowed for SSH access"
 }
+
+variable "environment" {
+  default     = "test"
+  description = "Deployment environment"
+}
