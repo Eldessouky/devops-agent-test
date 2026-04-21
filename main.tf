@@ -92,3 +92,13 @@ output "instance_public_ip" {
 output "jenkins_url" {
   value = "http://${aws_instance.devops_server.public_ip}:8080"
 }
+
+# S3 bucket for Jenkins artifacts
+resource "aws_s3_bucket" "jenkins_artifacts" {
+  bucket = "devops-agent-jenkins-artifacts"
+
+  tags = {
+    Name      = "jenkins-artifacts"
+    ManagedBy = "terraform"
+  }
+}
