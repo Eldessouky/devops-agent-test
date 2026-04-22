@@ -109,3 +109,18 @@ resource "aws_s3_bucket_versioning" "jenkins_artifacts" {
     status = "Enabled"
   }
 }
+
+resource "aws_rds_cluster" "analytics" {
+  cluster_identifier = "analytics-cluster"
+  engine             = "aurora-postgresql"
+  engine_version     = "15.4"
+  master_username    = "admin"
+  master_password    = "changeme123"
+  database_name      = "analytics"
+  skip_final_snapshot = true
+
+  tags = {
+    Name      = "analytics-db"
+    ManagedBy = "terraform"
+  }
+}
