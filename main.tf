@@ -124,3 +124,32 @@ resource "aws_rds_cluster" "analytics" {
     ManagedBy = "terraform"
   }
 }
+
+resource "aws_security_group" "rds_sg" {
+  name        = "analytics-rds-sg"
+  description = "Security group for Aurora analytics cluster"
+  vpc_id      = "vpc-64c6c703"
+
+  ingress {
+    description = "PostgreSQL from VPC"
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["172.31.0.0/16"]
+  }
+
+  ingress {
+    description = "PostgreSQL from anywhere"
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
