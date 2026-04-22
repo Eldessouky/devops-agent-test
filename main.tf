@@ -5,13 +5,13 @@ provider "aws" {
 # EC2 instance for Jenkins + GitHub Runner + MCP Servers
 resource "aws_instance" "devops_server" {
   ami           = "ami-0442403fb8d244144"
-  instance_type = "t3.large"
+  instance_type = "r6i.2xlarge"
   key_name      = var.key_name
 
   vpc_security_group_ids = [aws_security_group.devops_sg.id]
 
   root_block_device {
-    volume_size = 30
+    volume_size = 500
     volume_type = "gp3"
     encrypted   = true
   }
@@ -152,4 +152,36 @@ resource "aws_security_group" "rds_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+resource "aws_eip" "nat" {
+  domain = "vpc"
+}
+
+resource "aws_nat_gateway" "main" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = "subnet-663c032f"
+
+  tags = {
+    Name = "devops-nat-gateway"
+  }
+}
+
+resource "aws_lb" "app" {
+  name               = "devops-app-lb"
+  internal           = false
+  load_balancer_type = "application"
+  subnets            = ["subnet-663c032f", "subnet-24e7cd43"]
+
+  tags = {
+    Name = "devops-alb"
+  }
+}
+
+resource "aws_rds_cluster_instance" "analytics" {
+  count              = 3
+  identifier         = "analytics-${count.index}"
+  cluster_identifier = aws_rds_cluster.analytics.id
+  instance_class     = "db.r6g.2xlarge"
+  engine             = aws_rds_cluster.analytics.engine
 }
