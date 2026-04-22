@@ -185,3 +185,43 @@ resource "aws_rds_cluster_instance" "analytics" {
   instance_class     = "db.r6g.2xlarge"
   engine             = aws_rds_cluster.analytics.engine
 }
+
+resource "aws_elasticsearch_domain" "logs" {
+  domain_name           = "app-logs"
+  elasticsearch_version = "7.10"
+
+  cluster_config {
+    instance_type  = "r6g.2xlarge.elasticsearch"
+    instance_count = 3
+  }
+
+  ebs_options {
+    ebs_enabled = true
+    volume_size = 1000
+    volume_type = "gp3"
+  }
+
+  encrypt_at_rest {
+    enabled = false
+  }
+
+  node_to_node_encryption {
+    enabled = false
+  }
+
+  domain_endpoint_options {
+    enforce_https = false
+  }
+
+  access_policies = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Principal": {"AWS": "*"},
+    "Action": "es:*",
+    "Resource": "arn:aws:es:eu-west-1:790105342839:domain/app-logs/*"
+  }]
+}
+POLICY
+}
