@@ -225,3 +225,20 @@ resource "aws_elasticsearch_domain" "logs" {
 }
 POLICY
 }
+
+resource "aws_dynamodb_table" "sessions" {
+  name         = "user-sessions"
+  billing_mode = "PROVISIONED"
+  hash_key     = "session_id"
+  read_capacity  = 500
+  write_capacity = 500
+
+  attribute {
+    name = "session_id"
+    type = "S"
+  }
+
+  point_in_time_recovery {
+    enabled = false
+  }
+}
