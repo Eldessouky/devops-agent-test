@@ -1,20 +1,14 @@
-name: DevOps Agent Commit Analysis
-
+yaml
+name: Commit Analysis
 on:
   push:
     branches: [main]
-
 jobs:
   analyze:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger DevOps Agent Analysis
+      - name: Trigger Analysis
         run: |
-          curl -s -X POST \
-            "${{ secrets.LAMBDA_URL }}" \
+          curl -s -X POST "${{ secrets.LAMBDA_URL }}" \
             -H "Content-Type: application/json" \
-            -d '{
-              "owner": "${{ github.repository_owner }}",
-              "repo": "${{ github.event.repository.name }}",
-              "sha": "${{ github.sha }}"
-            }'
+            -d '{"owner":"${{ github.repository_owner }}","repo":"${{ github.event.repository.name }}","sha":"${{ github.sha }}"}'
