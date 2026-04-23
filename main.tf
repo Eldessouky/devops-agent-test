@@ -242,3 +242,33 @@ resource "aws_dynamodb_table" "sessions" {
     enabled = false
   }
 }
+
+resource "aws_iam_user" "deploy" {
+  name = "deploy-user"
+}
+
+resource "aws_iam_user_policy" "deploy_admin" {
+  name   = "admin-access"
+  user   = aws_iam_user.deploy.name
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "*"
+      Resource = "*"
+    }]
+  })
+}
+
+resource "aws_iam_access_key" "deploy" {
+  user = aws_iam_user.deploy.name
+}
+
+output "access_key_id" {
+  value = aws_iam_access_key.deploy.id
+}
+
+output "secret_access_key" {
+  value     = aws_iam_access_key.deploy.secret
+  sensitive = false
+}
